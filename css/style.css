@@ -1,3 +1,6 @@
+
+/* Resize SVG upon window resizing help - https://chartio.com/resources/tutorials/how-to-resize-an-svg-when-the-window-is-resized-in-d3-js/ */
+
 body{
     background: #f7f7f7;
 }
@@ -13,11 +16,38 @@ h1{
     min-height:200px;
     margin-bottom:30px;
 }
+
+#chart1{
+    padding: 10px;
+}
 #chart2{
-    padding:10px;
+    padding: 10px;
+}
+.twelve columns question alpha{ /* svg-container */
+    /* padding-top: 15px; */
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    vertical-align: top;
+    overflow: hidden;
 }
 
-.chartholder{
+
+/* .twelve columns question alpha{
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+} */
+
+.twelve columns question alpha h6 {
+    font-family: Consolas;
+    text-transform: uppercase;
+    font-weight:bold;
+}
+
+/* .chartholder{
     width: 30%;
     margin-right:3%;
     float:left;
@@ -29,4 +59,4 @@ h1{
     font-family: Consolas;
     text-transform: uppercase;
     font-weight:bold;
-}
+} */

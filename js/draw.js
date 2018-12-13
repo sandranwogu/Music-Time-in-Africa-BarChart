@@ -9,7 +9,7 @@ $(document).ready(function () {
 
 var countryDict = {};
 function loadData() {
-    d3.csv("./data/countryCounter.csv",
+    d3.csv("data/countryCounter.csv",
     function (d) {
         data = d;
 
@@ -22,12 +22,13 @@ function loadData() {
         })
         // console.log(data);
         console.log(countryDict);
-        visualizeBarChart(countryDict);
-            // When the data is loaded, then run the function.
+        visualizeBarChart1(countryDict);
+        visualizeBarChart2(countryDict);
+        // FIRST load the data, then run the function.
     });
 }
 
-function visualizeBarChart(countryDict) {
+function visualizeBarChart1(countryDict) {
 
     //Define Vis Dimensions
     var margin = { top: 20, right: 20, bottom: 30, left: 60 }, width = 940 - margin.left - margin.right,
@@ -44,23 +45,15 @@ function visualizeBarChart(countryDict) {
         .range([height, 0]);
         // domain define when bar updates
 
-
-
     // Create the vis canvas
     var svg = d3.select("#chart1").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        // .attr("width", width + margin.left + margin.right)
+        // .attr("height", height + margin.top + margin.bottom)
+        .attr("preserveAspectRatio", "xMinYMin meet")
+        .attr("viewBox", "0 0 940 500")
+        .classed("twelve columns question alpha", true)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    // Attempt to add a title
-    // svg.append("text")
-    //         .attr("x", (width / 2))
-    //         .attr("y", 0 - (margin.top / 2))
-    //         .attr("text-anchor", "middle")
-    //         .style("font-size", "16px")
-    //         .style("text-decoration", "underline")
-    //         .text("Country Mentions Per Year");
 
     // Make x-axis and add it to the canvas
     var xAxis = d3.axisBottom(xScale);
@@ -85,37 +78,34 @@ function visualizeBarChart(countryDict) {
 
     yAxisHandleForUpdate.append("text")
         .attr("transform", "rotate(-90)")
+        // continuous.nice([count])
+        // .tickFormat(count, d3.format(",f"))
         .attr("y", 6)
-        .attr("dy", ".71em")
+        .attr("dy", ".85em")
+        .attr("fill", "#000") // Text Color
         .style("text-anchor", "end")
-        .text("Incidents");
+        .text("TOTAL MENTIONS");
 
     // ------ START UPDATING BARS [w/in overall function]-----
     var updateBars = function(data){
+
         if (initialData === undefined) {
             return;
             // if the initialData does not have any values loaded into it, don't run this funciton
         }
-        console.log('This is the updateBars() ' + data);
+        console.log('This is the updateBars() for chart1: ' + data);
             // This is grabbing the value for the initialData() at the bottom. If they match upon changing the country, that is good.
 
-
         // Update Y-AXIS 1st
-// ================== PROBLEM IS IN yScale ==================
         // Only the SELECTED country should be in the yScale variable
-        // country:[val,val,val,val]
 
-
-        yScale.domain([0, d3.max(data)]);
+        yScale.domain([0, d3.max(data)]).nice();
             // This will update the y-axis when each country is selected
 
         yAxisHandleForUpdate.call(yAxis);
 
-        // Create the BARS - is the data() correct?
-    // Do I want .data(data) or .data(initialData) ?
+        // Create the BARS
         var bars = svg.selectAll(".bar").data(data);
-        // .data(data.value) caused the bars to not function
-        // .data(initialData, function(d) {return d.value});
         // console.log(bars);
 
         // Add the BARS for NEW data
@@ -126,19 +116,19 @@ function visualizeBarChart(countryDict) {
                 .attr("fill", "#E0D22E")
                 .attr("x", function(d,i) {return xScale(yearField[i] ); })
                 .attr("width", xScale.bandwidth())
-                    // xScale.scaleBand()
                 .attr("y", function(d,i) {return yScale(d); })
                 .attr("height", function(d,i) { return height - yScale(d); });
-            // console.log(bars); // an undefined array
+            // console.log(bars);
+
             // UPDATE old bars, but KEEP x/width from above
             bars
-                .transition().duration(200)
+                .transition().duration(400)
                     // microseconds
                 .attr("y", function(d,i) { return yScale(d); })
                 .attr("height", function(d,i) { return height - yScale(d); });
             // console.log(bars);
-            // Remove old bars to prep for the change
-            bars
+
+            bars // Remove old bars to prep for the change
                 .exit()
                 .remove();
     }; // ----- END UPDATE BARS -----
@@ -147,7 +137,7 @@ function visualizeBarChart(countryDict) {
 var dropDownChange = function(){
     var newCountry = d3.select(this).property('value');
     var newData = countryDict[newCountry];
-        console.log('This is newData: ' + newData);
+        console.log('This is newData for chart1: ' + newData);
     updateBars(newData);
 }; // ----- END DROP DOWN VALUE CHANGE HANDLER -----
 
@@ -162,23 +152,133 @@ var dropdown = d3.select("#chart1")
     // Here is adding the drop down
     .insert("select", "svg")
         // And inserting it into the canvas
-    // .style('transform', 'translate(50%, 15%)')
-    // .style("transform", "translate(250,250)")
-    .on("change", dropDownChange); // HERE IS WHERE THE CHANGE OCCURS
+    .classed("twelve columns question alpha", true)
+        // This is positioning the drop down in the SVG
+    .on("change", dropDownChange);
+        // HERE IS WHERE THE CHANGE OCCURS
 
     dropdown.selectAll("option")
         .data(countries)
         .enter()
         .append("option")
         .attr("value", function(d) {return d; })
-        .text(function(d){
-            return d.toUpperCase();
-            // uppercase all the letters
-        });
+        .text(function(d){ return d.toUpperCase(); });
 
     var initialData = countryDict['Algeria'];
-    // console.log(initialData);
+    console.log('This is the initialData for chart1: ' + initialData);
+        // What is being updated
+    updateBars(initialData);
+};
 
-        console.log('This is the initialData: ' + initialData); // What is being updated
+function visualizeBarChart2(countryDict) {
+
+    var margin = { top: 20, right: 20, bottom: 30, left: 60 }, width = 940 - margin.left - margin.right, height = 500 - margin.top - margin.bottom;
+
+    var xScale = d3.scaleBand()
+        .domain(yearField)
+        .range([0, width])
+        .padding(0.1);
+
+    var yScale = d3.scaleLinear()
+        .range([height, 0]);
+
+    var svg = d3.select("#chart2").append("svg")
+        // .attr("width", width + margin.left + margin.right)
+        // .attr("height", height + margin.top + margin.bottom)
+        .attr("preserveAspectRatio", "xMinYMin meet")
+        .attr("viewBox", "0 0 940 500")
+        .classed("twelve columns question alpha", true)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var xAxis = d3.axisBottom(xScale);
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-30)");
+
+    var yAxis = d3.axisLeft(yScale);
+
+    var yAxisHandleForUpdate = svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+
+    yAxisHandleForUpdate.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".85em")
+        .attr("fill", "#000")
+        .style("text-anchor", "end")
+        .text("TOTAL MENTIONS");
+
+    // ------ START UPDATING BARS [w/in overall function]-----
+    var updateBars = function(data){
+        if (initialData === undefined) {
+            return;
+        }
+        console.log('This is the updateBars() for chart2: ' + data);
+            // This is grabbing the value for the initialData() at the bottom. If they match upon changing the country, that is good.
+
+        yScale.domain([0, d3.max(data)]).nice();
+
+        yAxisHandleForUpdate.call(yAxis);
+
+        var bars = svg.selectAll(".bar").data(data);
+        // console.log(bars);
+
+            bars
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .attr("fill", "#3090C7")
+                .attr("x", function(d,i) {return xScale(yearField[i] ); })
+                .attr("width", xScale.bandwidth())
+                .attr("y", function(d,i) {return yScale(d); })
+                .attr("height", function(d,i) { return height - yScale(d); });
+
+            bars
+                .transition().duration(400)
+                .attr("y", function(d,i) { return yScale(d); })
+                .attr("height", function(d,i) { return height - yScale(d); });
+
+            bars
+                .exit()
+                .remove();
+    }; // ----- END UPDATE BARS -----
+
+// ----- DROP DOWN VALUE CHANGE HANDLER -----
+var dropDownChange = function(){
+    var newCountry = d3.select(this).property('value');
+    var newData = countryDict[newCountry];
+        console.log('This is newData for chart2: ' + newData);
+    updateBars(newData);
+}; // ----- END DROP DOWN VALUE CHANGE HANDLER -----
+
+// ----- Get Country Names for DROP DOWN -----
+var countries = Object.keys(countryDict);
+    // console.log(countries);
+
+// ----- Adding the DROP DOWN to the Page------
+var dropdown = d3.select("#chart2")
+    .insert("select", "svg")
+    .classed("twelve columns question alpha", true)
+    .on("change", dropDownChange);
+
+    dropdown.selectAll("option")
+        .data(countries.splice(1))
+        .enter()
+        .append("option")
+        .attr("value", function(d) {return d; })
+        .text(function(d){ return d.toUpperCase(); })
+        .style('text-anchor','middle');
+
+    var initialData = countryDict['Angola'];
+    console.log('This is the initialData for chart2: ' + initialData);
     updateBars(initialData);
 };

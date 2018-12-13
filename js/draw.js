@@ -9,7 +9,7 @@ $(document).ready(function () {
 
 var countryDict = {};
 function loadData() {
-    d3.csv("data/countryCounter.csv",
+    d3.csv("./data/countryCounter.csv",
     function (d) {
         data = d;
 
